@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <windows.h>
+
+//bien toan cuc
+static long num_steps = 100000;
+double step = 1.0 / (double)num_steps, pi[4];
+
+DWORD WINAPI thread1(LPVOID p) {
+	//gan param truyen vao vao con tro t
+	int i = *(int*)p;
+	double x, sum = 0.0;
+
+	//tinh toan
+	for (double j = 0; j < 25000; j++) {
+		x = (4 * j + i + 0.5) * step;
+		sum = sum + 4.0 / (1.0 + x * x);
+	}
+	pi[i] = step * sum;
+//	printf("pi test %d = %f\n",i, pi[i]);
+	return 0;
+}
+int main()
+{
+	int param[16];
+	HANDLE hThreads[16];
+
+	//tao 4 thread
+	for (int i = 0; i < 4; i++) {
+		param[i] = i;
+		hThreads[i] = CreateThread(0, 0, thread1, &param[i], 0, 0);
+	}
+
+	WaitForMultipleObjects(4, hThreads, TRUE, INFINITE);
+
+	printf("Final Pi = %f", pi[0] + pi[1] + pi[2] + pi[3]);
+}
